@@ -1,1 +1,1 @@
-new addition
+print("new addition")
