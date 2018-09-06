@@ -43,9 +43,9 @@ while(True):
             end_cord_ey = ey+eh
             cv2.rectangle(frame, (ex,ey), (end_cord_ex, end_cord_ey), color, stroke)
 
-            if num < 10:    #takes a picture if both face and eyes are detected
-                img_item = "my_img"+str(num)+".png"
-                cv2.imwrite(img_item, frame2)   #getting image from frame2 to be rid of colorful facial detection rectangles
+            if num in range(0,100,10):  #for every image between 0 and 100 with increments of 10
+                img_item = "my_img" + str(num/10) + ".png"
+                cv2.imwrite(img_item,frame2)  # getting image from frame2 to be rid of colorful facial detection rectangles
 
             num += 1
 
