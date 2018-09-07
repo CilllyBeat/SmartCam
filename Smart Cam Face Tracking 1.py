@@ -115,7 +115,7 @@ while True:
 
 #    elif 220 <= abs(yCenter) <= 260:
 #        ser.write('1'.encode('ascii'))
-#        ser.write(struct.pack('>B', 3))
+        ser.write(struct.pack('>B', 3))
             # readresponse()
     cv2.imshow('frame', frame)
     # cv2.imshow('gray',gray) # needed for detection but not or showing
