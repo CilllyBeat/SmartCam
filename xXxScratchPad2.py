@@ -1,26 +1,35 @@
-import numpy as np
+import time
+import serial
+import struct
 import cv2
 
-STD_DIMENSIONS =  {
+STD_DIMENSIONS = {
     "480p": (640, 480),
     "720p": (1280, 720),
     "1080p": (1920, 1080),
     "4k": (3840, 2160),
 }
-    #funcition that sets the defalut resolution to 420p if resolution variable
-    # input does not match the dictionary (ensures standards are kept)
+# funcition that sets the defalut resolution to 420p if resolution variable
+# input does not match the dictionary (ensures standards are kept)
 def get_dimensions(cap, res):
     width, height = STD_DIMENSIONS['480p']
-    if res in STD_DIMENSIONS:   #if res is in STD_DIMENSIONS list then
-        width, height = STD_DIMENSIONS[res] #width and height is equal to res (to check if res is in the list)
+    if res in STD_DIMENSIONS:  # if res is in STD_DIMENSIONS list then
+        width, height = STD_DIMENSIONS[res]  # width and height is equal to res (to check if res is in the list)
     change_res(cap, width, height)
     return width, height
 
-def change_res(cap, width, height):
-    cap.set(3, width)   #x axis pixel amount
-    cap.set(4, height)  #y axis pixel amount
 
-resolution  = '480p'
+def change_res(cap, width, height):
+    cap.set(3, width)  # x axis pixel amount
+    cap.set(4, height)  # y axis pixel amount
+
+
+resolution = '480p'
+
+#for serial communication with aruino slave
+port = 'COM6'
+ser = serial.Serial(port,115200,timeout=0.5)
+#ser.open()
 
 # had major trouble referencing a classifier if it wansn't on same directory level as code
 #  - couldn't decipher path to classifier in data folder so it said the module was "empty"
@@ -33,9 +42,12 @@ dims = get_dimensions(cap, res=resolution)
 
 color = (0, 255, 0)  # BGR blue green red, not RGB red green blue, color of rectangle
 stroke = 2  # rectangle frame thickness
-num = 0 #counter for pictures
+num = 0  # counter for pictures
 
-while(True):
+xCenter = 320
+yCenter = 240
+
+while (True):
     # Capture frame-by-frame, one color for visual with rectangles showing, one for color visual without the
     # distracting rectangle (from which images will be collected
     ret, frame = cap.read()
@@ -43,39 +55,60 @@ while(True):
 
     # Our operations on the frame come here
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-
-    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=5) #what is scale factor min neighbor????
+    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5,
+                                          minNeighbors=5)  # what is scale factor min neighbor????
     for (x, y, w, h) in faces:
-#        print(x, y, w, h)  #to test if it sees the face
-#        roi_gray = gray[y:y+h, x:x+w]   # starting at y coordinate start (top left corner -> lower y coordinate (y plus height)
+        #        print(x, y, w, h)  #to test if it sees the face
+        #        roi_gray = gray[y:y+h, x:x+w]   # starting at y coordinate start (top left corner -> lower y coordinate (y plus height)
         roi_color_face = frame[y:y + h, x:x + w]
-#        img_item = "my_img.png"     # consider storing in other format?
-#        cv2.imwrite(img_item, roi_gray) #saves only roi of the image
-#        cv2.imwrite(img_item, roi_color_face)
+        #        img_item = "my_img.png"     # consider storing in other format?
+        #        cv2.imwrite(img_item, roi_gray) #saves only roi of the image
+        #        cv2.imwrite(img_item, roi_color_face)
 
-        end_cord_x = x+w #specifying lower corner coordinates of roi rectangle
-        end_cord_y = y+h
-        cv2.rectangle(frame, (x,y), (end_cord_x, end_cord_y), color, stroke)   #object, start coordinates, end cooordinates, color rectangle, stroke thickness
+        end_cord_x = x + w  # specifying lower corner coordinates of roi rectangle
+        end_cord_y = y + h
+        cv2.rectangle(frame, (x, y), (end_cord_x, end_cord_y), color,
+                      stroke)  # object, start coordinates, end cooordinates, color rectangle, stroke thickness
+        xCenter = (x + (x + w)) / 2
+        yCenter = (y + (y + h)) / 2
+
 
         eyes = eyes_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=5)
         for (ex, ey, ew, eh) in eyes:
             roi_color_eyes = frame[ey:ey + eh, ex:ex + ew]
 
-            end_cord_ex = ex+ew
-            end_cord_ey = ey+eh
-            cv2.rectangle(frame, (ex,ey), (end_cord_ex, end_cord_ey), color, stroke)
+            end_cord_ex = ex + ew
+            end_cord_ey = ey + eh
+            cv2.rectangle(frame, (ex, ey), (end_cord_ex, end_cord_ey), color, stroke)
 
-            if num in range(0,100,10):  #for every image between 0 and 100 with increments of 10
-                img_item = "my_img" + str(num/10) + ".png"
-                cv2.imwrite(img_item,frame2)  # getting image from frame2 to be rid of colorful facial detection rectangles
+            if num in range(0, 100, 10):  # for every image between 0 and 100 with increments of 10
+                img_item = "my_img" + str(num / 10) + ".png"
+                cv2.imwrite(img_item,
+                            frame2)  # getting image from frame2 to be rid of colorful facial detection rectangles
 
             num += 1
-    for (x, y, w, h) in faces:
-        xCenter = (x+(x+w))/2
-        print(xCenter)
+    print(xCenter,yCenter)
+    ser.write('0'.encode('ascii'))
+    if abs(xCenter) < 300: #based on resolution 480p
+        ser.write(struct.pack('>B', 1))
+    elif abs(xCenter) > 340:
+        ser.write(struct.pack('>B', 2))
+    elif abs(xCenter) > 220 and abs(xCenter) < 260:
+        ser.write(struct.pack('>B', 3))
+
+    ser.write('1'.encode('ascii'))
+    if abs(yCenter) < 220:  # based on resolution 480p
+        ser.write(struct.pack('>B', 1))
+    elif abs(yCenter) > 260:
+        ser.write(struct.pack('>B', 2))
+    elif abs(yCenter) > 220 and abs(yCenter) < 260:
+        ser.write(struct.pack('>B', 3))
+
+    xCenter = 320
+    yCenter = 240
     # Display the resulting frame
-    cv2.imshow('frame',frame)
-    #cv2.imshow('gray',gray) # needed for detection but not or showing
+    cv2.imshow('frame', frame)
+    # cv2.imshow('gray',gray) # needed for detection but not or showing
 
     if cv2.waitKey(20) & 0xFF == ord('q'):
         break
