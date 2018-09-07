@@ -49,9 +49,6 @@ color = (0, 255, 0)  # BGR blue green red, not RGB red green blue, color of rect
 stroke = 2  # rectangle frame thickness
 num = 0  # counter for pictures
 
-xCenter = 320
-yCenter = 240
-
 while True:
     # Capture frame-by-frame, one color for visual with rectangles showing, one for color visual without the
     # distracting rectangle (from which images will be collected
@@ -62,6 +59,8 @@ while True:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5,
                                           minNeighbors=5)  # what is scale factor min neighbor????
+    xCenter = 0  # resetting variable to be so the camera doesn't continue pan/tilt in case the last place a face was-
+    yCenter = 0  # seen was out of range and continue in that direction.
     for (x, y, w, h) in faces:
         print(x, y, w, h)  # to test if it sees the face
         roi_color_face = frame[y:y + h, x:x + w]
@@ -88,38 +87,42 @@ while True:
 
             num += 1
     print(xCenter, yCenter)
-    if abs(xCenter) < 300:  # based on resolution 480p
-        ser.write('0'.encode('ascii'))
-        ser.write(struct.pack('>B', 1))
-        # readresponse()
+    if xCenter != 0:
+        if abs(xCenter) < 300:  # based on resolution 480p
+            ser.write('0'.encode('ascii'))
+            ser.write(struct.pack('>B', 1))
 
-    elif abs(xCenter) > 340:
-        ser.write('0'.encode('ascii'))
-        ser.write(struct.pack('>B', 2))
-        # readresponse()
+        elif abs(xCenter) > 340:
+            ser.write('0'.encode('ascii'))
+            ser.write(struct.pack('>B', 2))
 
-    elif 300 <= abs(xCenter) <= 340:
+        elif 300 <= abs(xCenter) <= 340:
+            ser.write('0'.encode('ascii'))
+            ser.write(struct.pack('>B', 3))
+
+    if yCenter != 0:
+        if abs(yCenter) < 230:  # based on resolution 480p
+            ser.write('1'.encode('ascii'))
+            ser.write(struct.pack('>B', 3))
+
+        elif abs(yCenter) > 250:
+            ser.write('1'.encode('ascii'))
+            ser.write(struct.pack('>B', 2))
+
+        elif 220 <= abs(yCenter) <= 260:
+            ser.write('1'.encode('ascii'))
+            ser.write(struct.pack('>B', 3))
+
+    if xCenter is 0:
         ser.write('0'.encode('ascii'))
         ser.write(struct.pack('>B', 3))
-        # readresponse()
 
-#    if abs(yCenter) < 230:  # based on resolution 480p
-#        ser.write('1'.encode('ascii'))
-#        ser.write(struct.pack('>B', 1))
-            # readresponse()
+    if yCenter is 0:
+        ser.write('1'.encode('ascii'))
+        ser.write(struct.pack('>B', 3))
 
-#    elif abs(yCenter) > 250:
-#        ser.write('1'.encode('ascii'))
-#        ser.write(struct.pack('>B', 2))
-#            # readresponse()
-
-#    elif 220 <= abs(yCenter) <= 260:
-#        ser.write('1'.encode('ascii'))
-#        ser.write(struct.pack('>B', 3))
-            # readresponse()
     cv2.imshow('frame', frame)
     # cv2.imshow('gray',gray) # needed for detection but not or showing
-
     if cv2.waitKey(20) & 0xFF == ord('q'):
         break
 
