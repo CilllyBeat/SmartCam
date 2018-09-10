@@ -19,7 +19,7 @@ num = 0  # counter for pictures
 while True:
     # Capture frame-by-frame, one color for visual with rectangles showing, one for color visual without the
     # distracting rectangle (from which images will be collected
-    ret, frame = cap.read()   # used for showing window with rectangles
+    ret, frame = cap.read()  # used for showing window with rectangles
     ret, frame2 = cap.read()  # used for taking images w/o rectangles
 
     # Our operations on the frame come here
@@ -29,7 +29,7 @@ while True:
     yCenter = 0  # seen was out of range and continue in that direction.
 
     for (x, y, w, h) in faces:
-        print(x, y, w, h)  # to test if it sees the face
+        #print(x, y, w, h)  # to test if it sees the face
         roi_color_face = frame[y:y + h, x:x + w]
 
         end_cord_x = x + w  # specifying lower corner coordinates of roi rectangle
@@ -39,22 +39,30 @@ while True:
         xCenter = (x + (x + w)) / 2
         yCenter = (y + (y + h)) / 2
 
-    print(xCenter, yCenter)  # so I can see the coordinates when issues occur (troubleshooting)
-    if xCenter != 0:    # checks to see if there is a coordinate y
-        if abs(xCenter) < 280:  # based on resolution 480p
+        if num in range(0, 101, 10):  # for saving pictures at intervals. w/o intervals = almost identical pictures
+            img_item = "img" + str(num / 10) + ".png"
+            cv2.imwrite(img_item, frame2)  # getting image from frame2 to be rid of colorful rectangles
+
+        num += 1
+
+    #print(xCenter, yCenter)  # so I can see the coordinates when issues occur (troubleshooting)
+    if xCenter != 0:  # checks to see if there is a coordinate y
+        if xCenter < 280:  # based on resolution 480p
             ser.write('0'.encode('ascii'))  # activate pan motor
             ser.write(struct.pack('>B', 1))  # if centre of rectangle is left of OK range, move right
 
-        elif abs(xCenter) > 360:
+        elif xCenter > 360:
             ser.write('0'.encode('ascii'))
             ser.write(struct.pack('>B', 2))  # if centre of rectangle is right of OK range, move left
 
-        elif 280 <= abs(xCenter) <= 360:
-            ser.write('0'.encode('ascii'))
-            ser.write(struct.pack('>B', 3))  # if centre is in range, do nothing
+#        elif 280 <= xCenter <= 360:
+#            ser.write('0'.encode('ascii'))
+#            ser.write(struct.pack('>B', 3))  # if centre is in range, do nothing
 
-    if yCenter != 0:    # checks to see if there is a coordinate y
+    if yCenter != 0:  # checks to see if there is a coordinate y
+        print("break a" + str(yCenter))
         if yCenter < 200:  # based on resolution 480p
+            print("break b" + str(yCenter))
             ser.write('1'.encode('ascii'))  # activate tilt motor
             ser.write(struct.pack('>B', 1))  # if centre rectangle is above OK range, move down
 
@@ -62,15 +70,15 @@ while True:
             ser.write('1'.encode('ascii'))
             ser.write(struct.pack('>B', 2))  # if centre rectangle is below OK range, move up
 
-        elif 200 <= yCenter <= 280:
-            ser.write('1'.encode('ascii'))
-            ser.write(struct.pack('>B', 3))  # centre is in OK range do nothing
+#        elif 200 <= yCenter <= 280:
+#            ser.write('1'.encode('ascii'))
+#            ser.write(struct.pack('>B', 3))  # centre is in OK range do nothing
 
-    if xCenter is 0:    # if there is no face coordinates will be (0, 0)
+    if xCenter is 0:  # if there is no face coordinates will be (0, 0)
         ser.write('0'.encode('ascii'))
         ser.write(struct.pack('>B', 3))  # there is no face, therefore it shall stay put
 
-    if yCenter is 0:    # if there is no face coordinates will be (0, 0)
+    if yCenter is 0:  # if there is no face coordinates will be (0, 0)
         ser.write('1'.encode('ascii'))
         ser.write(struct.pack('>B', 3))  # there is no face, therefore it shall stay put
 

@@ -29,7 +29,7 @@ while True:
     yCenter = 0  # seen was out of range and continue in that direction.
 
     for (x, y, w, h) in faces:
-        print(x, y, w, h)  # to test if it sees the face
+        #print(x, y, w, h)  # to test if it sees the face
         roi_color_face = frame[y:y + h, x:x + w]
 
         end_cord_x = x + w  # specifying lower corner coordinates of roi rectangle
@@ -47,17 +47,17 @@ while True:
 
     print(xCenter, yCenter)  # so I can see the coordinates when issues occur (troubleshooting)
     if xCenter != 0:  # checks to see if there is a coordinate y
-        if abs(xCenter) < 280:  # based on resolution 480p
+        if xCenter < 280:  # based on resolution 480p
             ser.write('0'.encode('ascii'))  # activate pan motor
             ser.write(struct.pack('>B', 1))  # if centre of rectangle is left of OK range, move right
 
-        elif abs(xCenter) > 360:
+        elif xCenter > 360:
             ser.write('0'.encode('ascii'))
             ser.write(struct.pack('>B', 2))  # if centre of rectangle is right of OK range, move left
 
-        elif 280 <= abs(xCenter) <= 360:
-            ser.write('0'.encode('ascii'))
-            ser.write(struct.pack('>B', 3))  # if centre is in range, do nothing
+#        elif 280 <= xCenter <= 360:
+#            ser.write('0'.encode('ascii'))
+#            ser.write(struct.pack('>B', 3))  # if centre is in range, do nothing
 
     if yCenter != 0:  # checks to see if there is a coordinate y
         if yCenter < 200:  # based on resolution 480p
@@ -68,9 +68,9 @@ while True:
             ser.write('1'.encode('ascii'))
             ser.write(struct.pack('>B', 2))  # if centre rectangle is below OK range, move up
 
-        elif 200 <= yCenter <= 280:
-            ser.write('1'.encode('ascii'))
-            ser.write(struct.pack('>B', 3))  # centre is in OK range do nothing
+#        elif 200 <= yCenter <= 280:
+#            ser.write('1'.encode('ascii'))
+#            ser.write(struct.pack('>B', 3))  # centre is in OK range do nothing
 
     if xCenter is 0:  # if there is no face coordinates will be (0, 0)
         ser.write('0'.encode('ascii'))
