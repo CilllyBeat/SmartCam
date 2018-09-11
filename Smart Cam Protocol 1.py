@@ -5,9 +5,9 @@ from Classes import Cascades
 
 # for serial communication with aruino slave
 ser = serial.Serial('COM6', 115200, timeout=0.5)
-cap = cv2.VideoCapture(1)
+cap = cv2.VideoCapture(0)   # CHANGE BACK TO 1 WHEN NOT INTEGRATED WEBCAM
 
-frontface = Cascades('frontface', "haarcascade_frontalface_default.xml")
+frontface = Cascades('frontface', "haarcascade_frontalface_default.xml", frame=None, gray=None)
 
 color = (0, 255, 0)  # BGR blue green red, not RGB red green blue, color of rectangle
 stroke = 2  # rectangle frame thickness
@@ -25,26 +25,26 @@ while True:
     xCenter = 0  # resetting variable to be so the camera doesn't continue pan/tilt in case the last place a face was-
     yCenter = 0  # seen was out of range and continue in that direction.
 
-    frontface.createROI(frame,gray)
+    frontface.createROI(frame, gray)
+    frontface.createRect(frame)
 
 
 
+#    for (x, y, w, h) in faces:
+#        roi_color_face = frame[y:y + h, x:x + w]
+#
+#        end_cord_x = x + w  # specifying lower corner coordinates of roi rectangle
+#        end_cord_y = y + h
+#        cv2.rectangle(frame, (x, y), (end_cord_x, end_cord_y), color,
+#                      stroke)  # object, start coordinates, end cooordinates, color rectangle, stroke thickness
+#        xCenter = (x + (x + w)) / 2
+#        yCenter = (y + (y + h)) / 2
 
-    for (x, y, w, h) in faces:
-        roi_color_face = frame[y:y + h, x:x + w]
+#        if num in range(0, 101, 10):  # for saving pictures at intervals. w/o intervals = almost identical pictures
+#            img_item = "img" + str(num / 10) + ".png"
+#            cv2.imwrite(img_item, frame2)  # getting image from frame2 to be rid of colorful rectangles
 
-        end_cord_x = x + w  # specifying lower corner coordinates of roi rectangle
-        end_cord_y = y + h
-        cv2.rectangle(frame, (x, y), (end_cord_x, end_cord_y), color,
-                      stroke)  # object, start coordinates, end cooordinates, color rectangle, stroke thickness
-        xCenter = (x + (x + w)) / 2
-        yCenter = (y + (y + h)) / 2
-
-        if num in range(0, 101, 10):  # for saving pictures at intervals. w/o intervals = almost identical pictures
-            img_item = "img" + str(num / 10) + ".png"
-            cv2.imwrite(img_item, frame2)  # getting image from frame2 to be rid of colorful rectangles
-
-        num += 1
+#        num += 1
 
     # print(xCenter, yCenter)  # so I can see the coordinates when issues occur (troubleshooting)
     if xCenter != 0:  # checks to see if there is a coordinate y
