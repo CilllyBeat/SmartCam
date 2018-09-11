@@ -2,7 +2,7 @@ import serial
 import struct
 import cv2
 
-ser = serial.Serial('COM5', 115200, timeout=0.5)
+ser = serial.Serial('COM6', 115200, timeout=0.5)
 
 
 class Motor:
@@ -37,6 +37,7 @@ class Detector:
         self.end_cord_y = 0
         self.xCenter = 0
         self.yCenter = 0
+        self.num = 0
 
     def detectROI(self, gray_frame):
         area = self.cascade.detectMultiScale(gray_frame, scaleFactor=1.5, minNeighbors=5)
@@ -65,3 +66,8 @@ class Detector:
         self.yCenter = (self.y + (self.y + self.h)) / 2
         # print(self.yCenter)
         return self.yCenter
+
+    def saveFrame(self, image_frame):
+        photo = self.name + str(self.num / 10) + ".png"
+        cv2.imwrite(photo, image_frame)
+        self.num += 1

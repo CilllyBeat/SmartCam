@@ -7,14 +7,11 @@ tiltMotor = Motor(1)
 
 #sets detection filter
 face = Detector("face", "haarcascade_frontalface_default.xml")
-
-# face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-# eyes_cascade = cv2.CascadeClassifier("haarcascade_eye.xml")
-# smile_cascade = cv2.CascadeClassifier("haarcascade_smile.xml")
+# eyes = Detector("eyes", "haarcascade_eye.xml")
+face_alt = Detector("face_alt", "haarcascade_frontalface_alt.xml")
+face_alt_2 = Detector("face_alt_2", "haarcascade_frontalface_alt2.xml")
 
 cap = cv2.VideoCapture(1)   # change to 1 for usb cam
-
-# num = 0  # counter for pictures
 
 while True:
     # Capture frame-by-frame, one color for visual with rectangles showing, one for color visual without the
@@ -22,31 +19,20 @@ while True:
     ret, frame = cap.read()  # used for showing window with rectangles
     ret, frame2 = cap.read()  # used for taking images w/o rectangles
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # to use haar cascade, frame must be gray-scale
-    if face.detectROI(gray) is ():
+    faceROI = face.detectROI(gray)
+    faceAltROI = face_alt.detectROI(gray)
+    faceAlt2ROI = face_alt_2.detectROI(gray)
+    if faceROI is() and faceAltROI is () and face_alt_2 is ():
         xCenter = 0  # resetting variable to be so the camera doesn't continue indirection last known face was-
         yCenter = 0
     else:
-        face.createRectangle(frame)
-        xCenter = face.xCenterCoordinate()
-        yCenter = face.yCenterCoordinate()
-
-    # faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=5)  # what is scale factor min neighbor?
-#    for (x, y, w, h) in faces:
-        # print(x, y, w, h)  # to test if it sees the face
-#        roi_color_face = frame[y:y + h, x:x + w]
-
-#        end_cord_x = x + w  # specifying lower corner coordinates of roi rectangle
-#        end_cord_y = y + h
-#        cv2.rectangle(frame, (x, y), (end_cord_x, end_cord_y), color,
-#                      stroke)  # object, start coordinates, end coordinates, color rectangle, stroke thickness
-#        xCenter = (x + (x + w)) / 2
-#        yCenter = (y + (y + h)) / 2
-
-#        for num in range(0, 101, 10):  # for saving pictures at intervals. w/o intervals = almost identical pictures
-#            img_item = "img" + str(num / 10) + ".png"
-#            cv2.imwrite(img_item, frame2)  # getting image from frame2 to be rid of colorful rectangles
-
-#        num += 1
+        #face.createRectangle(frame)
+        face_alt.createRectangle(frame) # best cascade in my opinion
+        #face_alt_2.createRectangle(frame)
+        # eyes.detectROI(gray)
+        # eyes.createRectangle(frame)
+        xCenter = face_alt.xCenterCoordinate()
+        yCenter = face_alt.yCenterCoordinate()
 
 #    print(xCenter, yCenter)  # so I can see the coordinates when issues occur (troubleshooting)
     if xCenter != 0:  # checks to see if there is a coordinate y
@@ -57,10 +43,10 @@ while True:
             panMotor.moveLeftOrUp()
 
     if yCenter != 0:  # checks to see if there is a coordinate y
-        if yCenter < 200:  # based on resolution 480p
+        if yCenter < 210:  # based on resolution 480p
             tiltMotor.moveDownOrRight()
 
-        elif yCenter > 280:
+        elif yCenter > 270:
             tiltMotor.moveLeftOrUp()
 
     if yCenter == 0:  # if there is no face coordinates will be (0, 0)
