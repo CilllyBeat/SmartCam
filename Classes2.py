@@ -12,17 +12,17 @@ class Motor:
     def moveDownOrRight(self):
         ser.write(str(self.address).encode('ascii'))  # activate pan/tilt motor
         ser.write(struct.pack('>B', 1))  # if centre of rectangle is left of OK range, move right
-        print('motor down or right' + str(self.address))
+        # print('motor down or right' + str(self.address))   # to check functionality
 
     def moveLeftOrUp(self):
         ser.write(str(self.address).encode('ascii'))  # activate pan motor
         ser.write(struct.pack('>B', 2))  # if centre of rectangle is left of OK range, move right
-        print('motor left or up' + str(self.address))
+        # print('motor left or up' + str(self.address))  # to check functionality
 
     def stayThere(self):
         ser.write(str(self.address).encode('ascii'))  # activate pan motor by sending address of motor
         ser.write(struct.pack('>B', 3))  # if centre of rectangle is left of OK range, move right
-        print('staying put' + str(self.address))
+        # print('staying put' + str(self.address))   # to check functionality
 
 
 class Detector:
@@ -40,7 +40,7 @@ class Detector:
 
     def detectROI(self, gray_frame):
         area = self.cascade.detectMultiScale(gray_frame, scaleFactor=1.5, minNeighbors=5)
-        print(area)
+        # print(area)   # to check functionality
         for (x, y, w, h) in area:
             self.x = x
             self.y = y
@@ -65,11 +65,3 @@ class Detector:
         self.yCenter = (self.y + (self.y + self.h)) / 2
         # print(self.yCenter)
         return self.yCenter
-
-#    def resetXCoordinate(self):
-#        self.xCenter = 0
-#        return (self.xCenter)
-
-#    def resetYCoordinate(self):
-#        self.yCenter = 0
-#        return (self.yCenter)
