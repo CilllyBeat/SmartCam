@@ -5,34 +5,36 @@ from Classes2 import Motor, Detector
 panMotor = Motor(0)
 tiltMotor = Motor(1)
 
-face = Detector("face","haarcascade_frontalface_default.xml")
+face = Detector("face", "haarcascade_frontalface_default.xml")
 
 # face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-eyes_cascade = cv2.CascadeClassifier("haarcascade_eye.xml")
-smile_cascade = cv2.CascadeClassifier("haarcascade_smile.xml")
+# eyes_cascade = cv2.CascadeClassifier("haarcascade_eye.xml")
+# smile_cascade = cv2.CascadeClassifier("haarcascade_smile.xml")
 
-cap = cv2.VideoCapture(0)   # change to 1 for usb cam
+cap = cv2.VideoCapture(1)   # change to 1 for usb cam
 
-color = (0, 255, 0)  # BGR blue green red, not RGB red green blue, color of rectangle
-stroke = 2  # rectangle frame thickness
-num = 0  # counter for pictures
+# num = 0  # counter for pictures
 
 while True:
     # Capture frame-by-frame, one color for visual with rectangles showing, one for color visual without the
     # distracting rectangle (from which images will be collected
     ret, frame = cap.read()  # used for showing window with rectangles
     ret, frame2 = cap.read()  # used for taking images w/o rectangles
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # to use haar cascade, frame must be grayscale
-    face.detectROI(gray, frame)
-    face.createRectangle(frame)
-    face.centreCoordinates()
-    # faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=5)  # what is scale factor min neighbor?
-
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)  # to use haar cascade, frame must be gray-scale
     xCenter = 0  # resetting variable to be so the camera doesn't continue pan/tilt in case the last place a face was-
     yCenter = 0  # seen was out of range and continue in that direction.
+    if face.detectROI(gray) is ():
+        xCenter = 0  # resetting variable to be so the camera doesn't continue indirection last known face was-
+        yCenter = 0
+    else:
+        face.createRectangle(frame)
+    # faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=5)  # what is scale factor min neighbor?
+        xCenter = face.xCenterCoordinate()
+        yCenter = face.yCenterCoordinate()
+
 
 #    for (x, y, w, h) in faces:
-        #print(x, y, w, h)  # to test if it sees the face
+        # print(x, y, w, h)  # to test if it sees the face
 #        roi_color_face = frame[y:y + h, x:x + w]
 
 #        end_cord_x = x + w  # specifying lower corner coordinates of roi rectangle
@@ -52,11 +54,9 @@ while True:
     if xCenter != 0:  # checks to see if there is a coordinate y
         if xCenter < 280:  # based on resolution 480p
             panMotor.moveDownOrRight()
+
         elif xCenter > 360:
             panMotor.moveLeftOrUp()
-
-    if xCenter is 0:  # if there is no face coordinates will be (0, 0)
-        panMotor.stayThere()
 
     if yCenter != 0:  # checks to see if there is a coordinate y
         if yCenter < 200:  # based on resolution 480p
@@ -65,8 +65,11 @@ while True:
         elif yCenter > 280:
             tiltMotor.moveLeftOrUp()
 
-    if yCenter is 0:  # if there is no face coordinates will be (0, 0)
+    if yCenter == 0:  # if there is no face coordinates will be (0, 0)
         tiltMotor.stayThere()
+
+    if xCenter == 0:  # if there is no face coordinates will be (0, 0)
+        panMotor.stayThere()
 
     cv2.imshow('frame', frame)  # show image frame with rectangle
     if cv2.waitKey(20) & 0xFF == ord('q'):
