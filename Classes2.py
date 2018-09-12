@@ -1,6 +1,4 @@
-import serial
-import struct
-import cv2
+import serial, struct, cv2, time, pandas
 
 ser = serial.Serial('COM6', 115200, timeout=0.5)
 
@@ -88,3 +86,30 @@ class Camera:
 
     def releaseCam(self):
         return self.capture.release()
+
+class Motion:
+    def __init__(self, static_back):
+        self.static_back = static_back  # to initialize static back as none
+        self.gaussian = None
+        self.diff_frame = 0
+        self.thresh_frame = None
+
+    def setupStaticBack(self):
+        self.static_back = None
+        return self.static_back
+
+    def setupGaussianBlur(self, gray_frame):
+        return cv2.GaussianBlur(gray_frame, (21, 21), 0)
+
+    def returnDiff(self, static_back, gaussian):
+        self.diff_frame = cv2.absdiff(static_back, gaussian)
+        return self.diff_frame
+
+    def setThreshold(self):
+        self.thresh_frame = cv2.threshold(self.diff_frame, 30, 255, cv2.THRESH_BINARY)[1]
+        self.thresh_frame = cv2.dilate(self.thresh_frame, None, iterations=2)
+
+    def findContours(self):
+        (_, cnts, _) = cv2.findContours(self.thresh_frame.copy(),
+                                        cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        return (_, cnts, _)

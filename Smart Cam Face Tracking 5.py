@@ -1,4 +1,4 @@
-import cv2
+import cv2, time
 from Classes2 import Motor, Detector, Camera
 
 # initializes two objects of the class motor
@@ -20,7 +20,7 @@ while True:
 
     faceAltROI = face_alt.detectROI(gray)
 
-    if faceAltROI is(): # while an ROI doesn't exist:
+    if faceAltROI is():  # while an ROI doesn't exist:
         xCenter = 0  # resetting variable to be so the camera doesn't continue indirection last known face was-
         yCenter = 0
     else:   # while ROI does exist
@@ -47,7 +47,7 @@ while True:
 
         if xCenter == 0:  # if there is no face coordinates will be (0, 0)
             panMotor.stayThere()
-
+    time.sleep(0.04)    #adjusting framerate
     cv2.imshow('frame', frame)  # show image frame with rectangle
     if cv2.waitKey(20) & 0xFF == ord('q'):
         break
