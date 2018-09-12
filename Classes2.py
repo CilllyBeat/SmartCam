@@ -71,3 +71,20 @@ class Detector:
         photo = self.name + str(self.num / 10) + ".png"
         cv2.imwrite(photo, image_frame)
         self.num += 1
+
+class Camera:
+    def __init__(self, input_channel):
+        self.input = input_channel
+
+    def setupVideo(self):
+        self.capture = cv2.VideoCapture(self.input)
+        return self.capture
+
+    def setupFrame(self):
+        return self.capture.read()
+
+    def setupGrayFRame(self, copy_frame):
+        return cv2.cvtColor(copy_frame, cv2.COLOR_BGR2GRAY)
+
+    def releaseCam(self):
+        return self.capture.release()

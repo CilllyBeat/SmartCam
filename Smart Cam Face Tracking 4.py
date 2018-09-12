@@ -12,6 +12,7 @@ face = Detector("face_alt", "haarcascade_frontalface_alt.xml")
 
 cap = cv2.VideoCapture(1)   # change to 1 for usb cam, begins video capture
 
+
 while True:
     # Capture frame-by-frame, one color for visual with rectangles showing, one for color visual without the
     # distracting rectangle (from which images will be collected)
