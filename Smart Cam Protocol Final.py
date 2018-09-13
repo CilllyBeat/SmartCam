@@ -5,7 +5,7 @@ from Classes_Final import Motor, Detector, Camera
 panMotor = Motor(0)
 tiltMotor = Motor(1)
 cam = Camera(1)
-detector = Detector("face_alt", "haarcascade_frontalface_default.xml")
+detector = Detector("face_alt", "haarcascade_frontalface_alt.xml")
 
 cam.setupVideo()  # set up video capture
 

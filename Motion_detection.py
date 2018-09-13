@@ -1,6 +1,5 @@
 import cv2, time
-from Classes2 import Motor, Detector, Camera, Motion
-import numpy as np
+from Classes_Final import Motor, Detector, Camera, Motion
 
 face_alt = Detector("face_alt", "haarcascade_frontalface_alt.xml")
 panMotor = Motor(0)
@@ -41,26 +40,27 @@ while True:
             continue
 
         (x, y, w, h) = cv2.boundingRect(contour)
+        cv2.imshow(cv2.boundingRect(contour))
         xCenter = (x + (x + w)) / 2
         yCenter = (y + (y + h)) / 2
         print(xCenter, yCenter)
 
-    if xCenter != 0:  # checks to see if there is a coordinate y
-        if xCenter < 300:  # based on resolution 480p
-            panMotor.moveDownOrRight()
+#    if xCenter != 0:  # checks to see if there is a coordinate y
+#        if xCenter < 300:  # based on resolution 480p
+#            panMotor.moveDownOrRight()
 
-        elif xCenter > 340:
-            panMotor.moveLeftOrUp()
+#        elif xCenter > 340:
+#            panMotor.moveLeftOrUp()
 
-    if yCenter != 0:  # checks to see if there is a coordinate y
-        if yCenter < 220:  # based on resolution 480p
-            tiltMotor.moveDownOrRight()
+#    if yCenter != 0:  # checks to see if there is a coordinate y
+#        if yCenter < 220:  # based on resolution 480p
+#            tiltMotor.moveDownOrRight()
 
-        elif yCenter > 260:
-            tiltMotor.moveLeftOrUp()
+#        elif yCenter > 260:
+#            tiltMotor.moveLeftOrUp()
 
-        if yCenter == 0:  # if there is no face coordinates will be (0, 0)
-            tiltMotor.stayThere()
+#        if yCenter == 0:  # if there is no face coordinates will be (0, 0)
+#            tiltMotor.stayThere()
 
     if xCenter == 0:  # if there is no face coordinates will be (0, 0)
         panMotor.stayThere()

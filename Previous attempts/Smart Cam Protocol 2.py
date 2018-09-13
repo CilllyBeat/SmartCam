@@ -1,11 +1,11 @@
 import cv2, time
-from Classes_Final import Motor, Detector, Camera
+from Classes2 import Motor, Detector, Camera
 
 # initializing class objects
 panMotor = Motor(0)
 tiltMotor = Motor(1)
 cam = Camera(1)
-detector = Detector("face_alt", "haarcascade_frontalface_default.xml")
+face_alt = Detector("face_alt", "haarcascade_frontalface_alt.xml")  # sets detection filter
 
 cam.setupVideo()  # set up video capture
 
@@ -14,15 +14,15 @@ while True:
     ret, frame = cam.setupFrame()
     gray = cam.setupGrayFRame(frame)
 
-    detector_ROI = detector.detectROI(gray)  # creates ROI based on cascade from gray
+    face_alt_ROI = face_alt.detectROI(gray)
 
-    if detector_ROI is():  # while an ROI doesn't exist:
+    if face_alt_ROI is():  # while an ROI doesn't exist:
         xCenter = 0  # resetting variable to be so the camera doesn't continue indirection last known face was-
         yCenter = 0
     else:   # while ROI does exist
-        detector.createRectangle(frame)  # creates visual rectangle around roi in show-frame
-        xCenter = detector.xCenterCoordinate()  # returns x-center of face detection
-        yCenter = detector.yCenterCoordinate()  # returns y-center of face detection
+        face_alt.createRectangle(frame)  # creates visual rectangle around roi in show-frame
+        xCenter = face_alt.xCenterCoordinate()  # returns x-center of face detection
+        yCenter = face_alt.yCenterCoordinate()  # returns y-center of face detection
 
         if xCenter != 0 or yCenter != 0:  # checks if a face is detected
             if xCenter < 280:  # based on resolution 480p (640 by 480 pixels)
@@ -41,7 +41,7 @@ while True:
             yCenter = 0
 
     time.sleep(0.04)    # for adjusting frame-rate
-    cv2.imshow('Detection and tracking', frame)  # show image frame with rectangle
+    cv2.imshow('Face detection and tracking', frame)  # show image frame with rectangle
     if cv2.waitKey(20) & 0xFF == ord('q'):
         break
 
